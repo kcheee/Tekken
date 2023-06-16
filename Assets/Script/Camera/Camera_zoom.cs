@@ -1,6 +1,4 @@
 using Cinemachine;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Camera_zoom : MonoBehaviour
@@ -19,12 +17,12 @@ public class Camera_zoom : MonoBehaviour
     private void Start()
     {
         // 초기 카메라 위치 설정
-       CB = gameObject.GetComponent<CinemachineBrain>();
+        CB = gameObject.GetComponent<CinemachineBrain>();
     }
 
     private void Update()
     {
-        if(GameManager.Gs==GameManager.Gamesetting.GameStart)
+        if (GameManager.Gs == GameManager.Gamesetting.GameStart)
             CB.enabled = false;
         // 두 오브젝트의 중심점 계산
         Vector3 centerPoint = GetCenterPoint();

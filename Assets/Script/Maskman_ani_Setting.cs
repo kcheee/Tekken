@@ -1,8 +1,4 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class Maskman_ani_Setting : MonoBehaviour
@@ -14,14 +10,21 @@ public class Maskman_ani_Setting : MonoBehaviour
         backstep,
         sit,
         jump,
+        guard,
         H_attack,
         K_attack,
+        Hit_hand,
+        Hit_kick
     }
 
     public lookat La;
 
     Animator ani;
     static public ani_state M_A_T;
+
+    // 사운드
+    public AudioClip[] Audioclip;
+    AudioSource soundSource;
 
     public GameObject Hand_R;
     public GameObject Hand_L;
@@ -50,20 +53,69 @@ public class Maskman_ani_Setting : MonoBehaviour
         J_flag = false;
         S_flag = false;
     }
+
+    // Guard animation events 
+
+
+    // hand_hit sound
+    // 머리 맞는 애니메이션에 넣음
+    void Head_hit()
+    {        // 손과 발
+        if (Guard_ani_Setting.G_A_T == Guard_ani_Setting.ani_state.H_attack)
+        {
+            soundSource.clip = Audioclip[1];
+            soundSource.PlayOneShot(Audioclip[1]);
+        }
+        if (Guard_ani_Setting.G_A_T == Guard_ani_Setting.ani_state.K_attack)
+        {
+
+            soundSource.clip = Audioclip[4];
+            soundSource.PlayOneShot(Audioclip[4]);
+        }
+    }
+
+    // 중단 맞는 애니메이션
+    void Middle_hit()
+    {
+        if (Guard_ani_Setting.G_A_T == Guard_ani_Setting.ani_state.H_attack)
+        {
+            soundSource.clip = Audioclip[2];
+            soundSource.PlayOneShot(Audioclip[2]);
+        }
+        if (Guard_ani_Setting.G_A_T == Guard_ani_Setting.ani_state.K_attack)
+        {
+
+            soundSource.clip = Audioclip[5];
+            soundSource.PlayOneShot(Audioclip[5]);
+        }
+    }
+
+    // 하단 맞는 애니메이션
+    void Low_hit()
+    {
+
+    }
+
     void Start()
     {
         M_A_T = ani_state.idle;
         ani = gameObject.GetComponent<Animator>();
+        soundSource = gameObject.GetComponent<AudioSource>();
     }
+
     void Update()
     {
+
         // idle 일때만 lookat 컴포넌트 켜짐
-        if (M_A_T == ani_state.idle)
+        if (M_A_T == ani_state.idle ||
+            M_A_T == ani_state.sit ||
+            M_A_T == ani_state.forwardstep ||
+            M_A_T == ani_state.backstep)
             La.enabled = true;
         else
             La.enabled = false;
 
-      
+
         // idle 상황일때 ani_state => idle
         if (ani.GetCurrentAnimatorStateInfo(0).IsName("idle"))
         {
@@ -85,7 +137,6 @@ public class Maskman_ani_Setting : MonoBehaviour
             M_A_T = ani_state.backstep;
         }
 
-
         // 공격 모션일때 콜라이더가 들어있는 게임 오브젝트가 켜짐.
         if (M_A_T == ani_state.H_attack)
         {
@@ -96,7 +147,6 @@ public class Maskman_ani_Setting : MonoBehaviour
         {
             kick_L.SetActive(true);
             kick_R.SetActive(true);
-
         }
         else
         {
@@ -131,6 +181,8 @@ public class Maskman_ani_Setting : MonoBehaviour
     {
         ani.SetBool("BackStep", false);
     }
+
+    // 이동
     void WalkFwd()
     {
         if (Input.GetKeyDown(KeyCode.LeftArrow))
@@ -156,13 +208,12 @@ public class Maskman_ani_Setting : MonoBehaviour
         {
             if (B_flag)
             {
-                StartCoroutine(delay("BackStep"));
                 ani.SetBool("BackStep", true);
             }
         }
         if (Input.GetKey(KeyCode.RightArrow))
         {
-            M_A_T = ani_state.backstep;
+
             ani.SetBool("walkbwd", true);
         }
         if (Input.GetKeyUp(KeyCode.RightArrow))
@@ -210,6 +261,7 @@ public class Maskman_ani_Setting : MonoBehaviour
 
     }
 
+    // 공격
     void R_jab()
     {
         if (Input.GetKeyDown(KeyCode.Keypad6))

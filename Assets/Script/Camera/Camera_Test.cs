@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 public class Camera_Test : MonoBehaviour
@@ -9,10 +6,10 @@ public class Camera_Test : MonoBehaviour
     public Transform object2; // 두 번째 오브젝트
 
 
-     public float cameraSpeed = 5f; // 카메라 이동 속도
-    
+    public float cameraSpeed = 5f; // 카메라 이동 속도
+
     private void Start()
-    {   
+    {
     }
     private void Update()
     {
@@ -21,7 +18,7 @@ public class Camera_Test : MonoBehaviour
         float middle_z = (object1.position.z + object2.position.z) / 2;
 
         // 두 오브젝트의 가운데에 오브젝트를 위치시킨다.
-        transform.position = Vector3.Lerp(transform.position, new Vector3(middle_x,0,middle_z), cameraSpeed);
+        transform.position = Vector3.Lerp(transform.position, new Vector3(middle_x, 0, middle_z), cameraSpeed);
 
         transform.LookAt(object1);
 

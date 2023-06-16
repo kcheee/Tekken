@@ -1,8 +1,6 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -15,39 +13,60 @@ public class GameManager : MonoBehaviour
         GameOver
     }
     static public Gamesetting Gs;
-    static public int a=2;
+    static public int a = 2;
     public TextMeshProUGUI timeText;    // 시간 체크
-    public TextMeshProUGUI readyText;
-    public TextMeshProUGUI fightText;
+    public TextMeshProUGUI round1;
+    public TextMeshProUGUI ready;
+    public TextMeshProUGUI fight;
     public TextMeshProUGUI drawtText;
     public float time = 50;
 
-    IEnumerator Ready()
-    {
-        yield return new WaitForSeconds(0.5f);
-        Gs = Gamesetting.Ready;
-        readyText.enabled = true;
+    // 사운드
+    public AudioClip[] Audioclip;
+    AudioSource soundSource;
 
-    }
-    IEnumerator gamestart()
+    IEnumerator Fight()
     {
-        readyText.enabled = false;
+        yield return new WaitForSeconds(2f);
+        round1.enabled = false;
+        ready.enabled = true;
         yield return new WaitForSeconds(0.5f);
-        fightText.enabled = false;
+        ready.enabled = false;
+        fight.enabled = true; 
+        soundSource.clip = Audioclip[1];
+        soundSource.PlayOneShot(Audioclip[1]);
+        yield return new WaitForSeconds(0.5f);
+        fight.enabled = false;
+        Gs = Gamesetting.GameStart;
+       
+    }
+
+    IEnumerator round()
+    {      
+        yield return new WaitForSeconds(0.5f);
+        // round sound
+        round1.enabled = true;
+        soundSource.clip = Audioclip[0];
+        soundSource.PlayOneShot(Audioclip[0]);
+        StartCoroutine(Fight());
     }
 
     private void Start()
     {
+        soundSource = GetComponent<AudioSource>();
         Gs = Gamesetting.Loding;
-        StartCoroutine(Ready());
+        StartCoroutine(round());
+
     }
+    float T;
     private void Update()
     {
+       
         if (Input.GetKeyUp(KeyCode.KeypadEnter))    // 임의로
         {
-            Gs = Gamesetting.GameStart;
-            fightText.enabled = true;
-            StartCoroutine(gamestart());
+            //Gs = Gamesetting.GameStart;
+            //Debug.Log(T);
+
         }
         if (Gs == Gamesetting.GameStart)
         {
