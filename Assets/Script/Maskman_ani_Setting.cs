@@ -181,6 +181,7 @@ public class Maskman_ani_Setting : MonoBehaviour
     {
         ani.SetBool("BackStep", false);
     }
+    void
 
     // ¿Ãµø
     void WalkFwd()

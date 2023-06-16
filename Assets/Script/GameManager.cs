@@ -1,10 +1,11 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-
+    public static GameManager Instance;
     public enum Gamesetting
     {
         GameStart,
@@ -51,6 +52,7 @@ public class GameManager : MonoBehaviour
         StartCoroutine(Fight());
     }
 
+
     private void Start()
     {
         soundSource = GetComponent<AudioSource>();
@@ -64,9 +66,8 @@ public class GameManager : MonoBehaviour
        
         if (Input.GetKeyUp(KeyCode.KeypadEnter))    // ¿”¿«∑Œ
         {
-            //Gs = Gamesetting.GameStart;
-            //Debug.Log(T);
 
+            SceneManager.LoadScene(2);
         }
         if (Gs == Gamesetting.GameStart)
         {
