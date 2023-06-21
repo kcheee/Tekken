@@ -29,7 +29,6 @@ public class SceneChange : MonoBehaviour
             {
                 Debug.Log("½ÇÇà22");
                 SceneManager.LoadScene(2);
-
             }
         }
 

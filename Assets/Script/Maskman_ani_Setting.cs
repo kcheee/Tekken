@@ -14,13 +14,22 @@ public class Maskman_ani_Setting : MonoBehaviour
         H_attack,
         K_attack,
         Hit_hand,
-        Hit_kick
+        Hit_kick,
+        Upper,
+        Floating
+    }
+
+    public enum special_state
+    {
+        idle,
+        upper
     }
 
     public lookat La;
 
     Animator ani;
     static public ani_state M_A_T;
+    static public special_state M_S_T;
 
     // 사운드
     public AudioClip[] Audioclip;
@@ -31,6 +40,10 @@ public class Maskman_ani_Setting : MonoBehaviour
     public GameObject kick_R;
     public GameObject kick_L;
 
+  
+
+    // 공중에 떠있는지 체크
+    bool isfloating;
 
     // dash,backstep,sit,jump 플래그
     bool D_flag;
@@ -55,7 +68,11 @@ public class Maskman_ani_Setting : MonoBehaviour
     }
 
     // Guard animation events 
-
+    IEnumerator FloatingColliderdelay()
+    {
+        yield return new WaitForSeconds(0.4f);
+        transform.Find("M_Wall_hit").transform.localEulerAngles = new Vector3(-90, 0, 0);
+    }
 
     // hand_hit sound
     // 머리 맞는 애니메이션에 넣음
@@ -65,6 +82,22 @@ public class Maskman_ani_Setting : MonoBehaviour
         {
             soundSource.clip = Audioclip[1];
             soundSource.PlayOneShot(Audioclip[1]);
+            // 어퍼컷!
+            if (Guard_ani_Setting.G_S_T == Guard_ani_Setting.special_state.upper)
+            {
+                M_A_T = Maskman_ani_Setting.ani_state.Floating;
+                ani.SetTrigger("Upperhit");
+                isfloating = true;
+                gameObject.GetComponent<Rigidbody>().useGravity = true;
+                gameObject.GetComponent<Rigidbody>().AddForce(Vector3.up * 7, ForceMode.Impulse);
+                
+
+                // 공중 콤보를 위한 마스크맨의 hitcollider을 회전시키기 위해 가져옴
+                // floating collider 90도 회전
+                StartCoroutine(FloatingColliderdelay());
+                 //Debug.Log(transform.Find("M_Wall_hit").transform.rotation);
+                ani.SetBool("Floating", true);
+            }
         }
         if (Guard_ani_Setting.G_A_T == Guard_ani_Setting.ani_state.K_attack)
         {
@@ -81,10 +114,29 @@ public class Maskman_ani_Setting : MonoBehaviour
         {
             soundSource.clip = Audioclip[2];
             soundSource.PlayOneShot(Audioclip[2]);
+
+            // 어퍼컷! 
+            if(Guard_ani_Setting.G_S_T == Guard_ani_Setting.special_state.upper)
+            {
+                M_A_T = Maskman_ani_Setting.ani_state.Floating;
+                Guard_ani_Setting.G_S_T = Guard_ani_Setting.special_state.idle;
+                ani.SetTrigger("Upperhit");
+                isfloating = true;
+                gameObject.GetComponent<Rigidbody>().useGravity = true;
+                gameObject.GetComponent<Rigidbody>().AddForce(Vector3.up * 7, ForceMode.Impulse);
+              
+                //gameObject.GetComponent<Rigidbody>().AddForce(transform.forward * 30, ForceMode.Impulse);
+                Debug.Log(gameObject.GetComponent<Rigidbody>().velocity);
+
+                // floating collider 90도 회전
+                StartCoroutine(FloatingColliderdelay());
+                //gameObject.GetComponent<Rigidbody>().AddForce(Vector3.forward * 10, ForceMode.Impulse);
+                ani.SetBool("Floating", true);
+            }
+
         }
         if (Guard_ani_Setting.G_A_T == Guard_ani_Setting.ani_state.K_attack)
         {
-
             soundSource.clip = Audioclip[5];
             soundSource.PlayOneShot(Audioclip[5]);
         }
@@ -105,70 +157,85 @@ public class Maskman_ani_Setting : MonoBehaviour
 
     void Update()
     {
-
-        // idle 일때만 lookat 컴포넌트 켜짐
-        if (M_A_T == ani_state.idle ||
+        if (GameManager.Gs == GameManager.Gamesetting.GameStart)
+        {
+            // idle 일때만 lookat 컴포넌트 켜짐
+            if (M_A_T == ani_state.idle ||
             M_A_T == ani_state.sit ||
             M_A_T == ani_state.forwardstep ||
             M_A_T == ani_state.backstep)
-            La.enabled = true;
+                La.enabled = true;
+            else
+                La.enabled = false;
+
+
+            // idle 상황일때 ani_state => idle
+            if (ani.GetCurrentAnimatorStateInfo(0).IsName("idle"))
+            {
+                M_A_T = ani_state.idle;
+            }
+            // ani.state => sit
+            if (ani.GetCurrentAnimatorStateInfo(0).IsName("sit"))
+            {
+                M_A_T = ani_state.sit;
+            }
+            // ani.state => fwd
+            if (ani.GetCurrentAnimatorStateInfo(0).IsName("fwd"))
+            {
+                M_A_T = ani_state.forwardstep;
+            }
+            // ani.state => fwd
+            if (ani.GetCurrentAnimatorStateInfo(0).IsName("bwd"))
+            {
+                M_A_T = ani_state.backstep;
+            }
+
+            // 공격 모션일때 콜라이더가 들어있는 게임 오브젝트가 켜짐.
+            if (M_A_T == ani_state.H_attack)
+            {
+                Hand_R.SetActive(true);
+                Hand_L.SetActive(true);
+            }
+            else if (M_A_T == ani_state.K_attack)
+            {
+                kick_L.SetActive(true);
+                kick_R.SetActive(true);
+            }
+            else
+            {
+                Hand_R.SetActive(false);
+                Hand_L.SetActive(false);
+                kick_L.SetActive(false);
+                kick_R.SetActive(false);
+            }
+
+            // 방어 모션
+            if (M_A_T == ani_state.backstep)
+                ani.SetBool("Hit_possible", false);
+
+            else
+                ani.SetBool("Hit_possible", true);
+
+            // 이동 공격 모션
+            WalkFwd();
+            WalkBwd();
+            sit();
+            jump();
+            R_jab(); L_jab(); R_kick(); L_kick();
+        }
         else
-            La.enabled = false;
-
-
-        // idle 상황일때 ani_state => idle
-        if (ani.GetCurrentAnimatorStateInfo(0).IsName("idle"))
-        {
             M_A_T = ani_state.idle;
-        }
-        // ani.state => sit
-        if (ani.GetCurrentAnimatorStateInfo(0).IsName("sit"))
-        {
-            M_A_T = ani_state.sit;
-        }
-        // ani.state => fwd
-        if (ani.GetCurrentAnimatorStateInfo(0).IsName("fwd"))
-        {
-            M_A_T = ani_state.forwardstep;
-        }
-        // ani.state => fwd
-        if (ani.GetCurrentAnimatorStateInfo(0).IsName("bwd"))
-        {
-            M_A_T = ani_state.backstep;
-        }
+    }
 
-        // 공격 모션일때 콜라이더가 들어있는 게임 오브젝트가 켜짐.
-        if (M_A_T == ani_state.H_attack)
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
         {
-            Hand_R.SetActive(true);
-            Hand_L.SetActive(true);
+            transform.Find("M_Wall_hit").transform.localEulerAngles = new Vector3(0, 0, 0);
+            isfloating = false;
+            ani.SetBool("Floating", false);
+            
         }
-        else if (M_A_T == ani_state.K_attack)
-        {
-            kick_L.SetActive(true);
-            kick_R.SetActive(true);
-        }
-        else
-        {
-            Hand_R.SetActive(false);
-            Hand_L.SetActive(false);
-            kick_L.SetActive(false);
-            kick_R.SetActive(false);
-        }
-
-        // 방어 모션
-        if (M_A_T == ani_state.backstep)
-            ani.SetBool("Hit_possible", false);
-
-        else
-            ani.SetBool("Hit_possible", true);
-
-        // 이동 공격 모션
-        WalkFwd();
-        WalkBwd();
-        sit();
-        jump();
-        R_jab(); L_jab(); R_kick(); L_kick();
     }
 
 
@@ -181,7 +248,6 @@ public class Maskman_ani_Setting : MonoBehaviour
     {
         ani.SetBool("BackStep", false);
     }
-    void
 
     // 이동
     void WalkFwd()

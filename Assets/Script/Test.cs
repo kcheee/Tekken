@@ -24,10 +24,12 @@ public class Test : MonoBehaviour
             {
                 // 콤보 도중에 막을 수 있는 상황 방지하기 위해 코루틴 넣어야되나
                 Maskman_ani_Setting.M_A_T = Maskman_ani_Setting.ani_state.Hit_hand;
+                
             }
             else if (gameObject.name.Contains("G_Wall_hit") && Guard_ani_Setting.G_A_T != Guard_ani_Setting.ani_state.backstep)
             {
                 Guard_ani_Setting.G_A_T = Guard_ani_Setting.ani_state.Hit_hand;
+               
             }
         }
         // 발

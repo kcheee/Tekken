@@ -14,4 +14,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/FightingGame.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Scenes/Guard_win.unity
+    guid: 39f0151ad9a39974b8b44ca0b2863eac
+  - enabled: 1
+    path: Assets/Scenes/MaskMan_win.unity
+    guid: 38f56cd74b7aad1429e6a46db97531ce
   m_configObjects: {}

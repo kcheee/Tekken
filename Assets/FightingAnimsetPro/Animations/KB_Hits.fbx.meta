@@ -6995,8 +6995,8 @@ ModelImporter:
       name: KB_HitOnGroundBack
       takeName: KB_HitOnGroundBack
       internalID: 0
-      firstFrame: 63
-      lastFrame: 118
+      firstFrame: 71.9
+      lastFrame: 96.5
       wrapMode: 0
       orientationOffsetY: 0
       level: 0

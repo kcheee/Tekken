@@ -8,6 +8,7 @@ TagManager:
   - Hand_L
   - Kick_R
   - Kick_L
+  - Ground
   layers:
   - Default
   - TransparentFX
