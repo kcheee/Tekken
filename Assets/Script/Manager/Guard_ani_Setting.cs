@@ -139,8 +139,7 @@ public class Guard_ani_Setting : MonoBehaviour
 
             // 상대가 공중에 뜰 때 lookat 취소
 
-            if (Maskman_ani_Setting.M_A_T == Maskman_ani_Setting.ani_state.Floating)
-                La.enabled = false;
+           
 
             // idle 상황일때 ani_state => idle
             if (ani.GetCurrentAnimatorStateInfo(0).IsName("idle"))
@@ -165,12 +164,14 @@ public class Guard_ani_Setting : MonoBehaviour
 
             //Debug.Log(G_A_T);
             // 공격 모션일때 콜라이더가 들어있는 게임 오브젝트가 켜짐.
-            if (G_A_T == ani_state.H_attack)
+            // 대쉬하고 손공격할때 콜라이더 켜지는거 수정
+            if (G_A_T == ani_state.H_attack && !ani.GetCurrentAnimatorStateInfo(0).IsName("Dash"))
             {              
                 Hand_R.enabled = true;
                 Hand_L.enabled = true;
             }
-            else if (G_A_T == ani_state.K_attack)
+            // 대쉬하고 발공격할때 콜라이더 켜지는거 수정
+            else if (G_A_T == ani_state.K_attack&& !ani.GetCurrentAnimatorStateInfo(0).IsName("Dash"))
             {
                 kick_L.enabled = true;
                 kick_R.enabled = true;
@@ -201,6 +202,15 @@ public class Guard_ani_Setting : MonoBehaviour
         }
         else
             G_A_T = ani_state.idle;
+
+        // ko 상황일떄 콜라이더 켜져있는 버그 수정
+        if(GameManager.Gs == GameManager.Gamesetting.KO)
+        {
+            Hand_R.enabled = false;
+            Hand_L.enabled = false;
+            kick_L.enabled=false;
+            kick_R.enabled=false;
+        }
     }
 
     // 애니메이션 events

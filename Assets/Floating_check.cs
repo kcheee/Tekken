@@ -9,18 +9,25 @@ public class Floating_check : StateMachineBehaviour
     public bool floatingState;
     public GameObject Maskman;
     float po_X;
-
+    float po_Z;
+    Vector3 currentPosition;
+    float minX = 1;
+    float minZ = 1;
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    {
-        
-        po_X = animator.transform.position.x; 
+    { 
+        po_X = animator.transform.position.x;
+        po_Z = animator.transform.position.z;
+
     }
     // floating 상태일 때 lookat 컴포넌트 비활성화 하기 위한 설정
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+
         Vector3 Po = animator.transform.position;
         Po.x = po_X;
+        Po.z = po_Z;
         animator.transform.position = Po;
+      
         if (guard)
         {
             floatingState = true;
@@ -29,9 +36,8 @@ public class Floating_check : StateMachineBehaviour
         if (maskman)
         {
             floatingState = true;
-            Maskman_ani_Setting.M_A_T = Maskman_ani_Setting.ani_state.Floating;
+            Maskman_ani_Setting.M_S_T = Maskman_ani_Setting.special_state.Floating;
         }
-
     }
 
     // 애니메이션 종료 후 끝내기

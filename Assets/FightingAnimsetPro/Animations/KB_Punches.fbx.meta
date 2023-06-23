@@ -1023,7 +1023,7 @@ ModelImporter:
       takeName: KB_p_Jab_L_1
       internalID: 0
       firstFrame: 0
-      lastFrame: 57
+      lastFrame: 44
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -1211,7 +1211,7 @@ ModelImporter:
       takeName: KB_p_Jab_R_1
       internalID: 0
       firstFrame: 0
-      lastFrame: 46
+      lastFrame: 34
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -3794,7 +3794,7 @@ ModelImporter:
       takeName: KB_m_Jab_R
       internalID: 0
       firstFrame: 0
-      lastFrame: 56
+      lastFrame: 45
       wrapMode: 0
       orientationOffsetY: 0
       level: 0

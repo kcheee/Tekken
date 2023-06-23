@@ -15,9 +15,9 @@ public class Upper : MonoBehaviour
            // 이름에 가드가 포함되면 가드의 상태를 어퍼컷으로 바꾼다.
             if (gameObject.name.Contains("Guard"))
             {
-                Guard_ani_Setting.G_S_T = Guard_ani_Setting.special_state.upper;
-                
+                Guard_ani_Setting.G_S_T = Guard_ani_Setting.special_state.upper;              
             }
+
             if (gameObject.name.Contains("Maskman"))
             {
                 Maskman_ani_Setting.M_A_T = Maskman_ani_Setting.ani_state.H_attack;
@@ -31,12 +31,14 @@ public class Upper : MonoBehaviour
         }
         
         // 어퍼컷 이후에 hand attack 할 때 어퍼컷되는 것 방지.
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.02f);
         Guard_ani_Setting.G_S_T = Guard_ani_Setting.special_state.idle;
         Maskman_ani_Setting.M_S_T = Maskman_ani_Setting.special_state.idle;
     }
+
+    // 어퍼컷에 있는 애니메이션 이벤트
     void Upper_check()
     {
-        StartCoroutine(ExecuteForDuration(1f));
+        StartCoroutine(ExecuteForDuration(0.5f));
     }
 }

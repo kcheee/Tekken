@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Maskman_ani_Setting : MonoBehaviour
 {
@@ -10,24 +11,27 @@ public class Maskman_ani_Setting : MonoBehaviour
         backstep,
         sit,
         jump,
+        lay,
         guard,
         H_attack,
         K_attack,
         Hit_hand,
         Hit_kick,
         Upper,
-        Floating
+        
     }
 
     public enum special_state
     {
         idle,
-        upper
+        upper,
+        Floating
     }
 
     public lookat La;
 
     Animator ani;
+    Rigidbody rb;
     static public ani_state M_A_T;
     static public special_state M_S_T;
 
@@ -71,7 +75,18 @@ public class Maskman_ani_Setting : MonoBehaviour
     IEnumerator FloatingColliderdelay()
     {
         yield return new WaitForSeconds(0.4f);
+        //콜라이더 각도와 포지션 수정
         transform.Find("M_Wall_hit").transform.localEulerAngles = new Vector3(-90, 0, 0);
+        transform.Find("M_Wall_hit").transform.localPosition = new Vector3(0, 0, 0.3f);
+    }
+
+    // floating 상태일 때 hit
+    void floatingHit ()
+    {
+        rb.velocity = Vector3.zero;
+        rb.AddForce(Vector3.up * 3f, ForceMode.Impulse);
+        
+        ani.SetTrigger("air hit");
     }
 
     // hand_hit sound
@@ -82,15 +97,20 @@ public class Maskman_ani_Setting : MonoBehaviour
         {
             soundSource.clip = Audioclip[1];
             soundSource.PlayOneShot(Audioclip[1]);
-            // 어퍼컷!
-            if (Guard_ani_Setting.G_S_T == Guard_ani_Setting.special_state.upper)
+            if (M_S_T == Maskman_ani_Setting.special_state.Floating)
             {
-                M_A_T = Maskman_ani_Setting.ani_state.Floating;
+                Debug.Log("머리");
+                floatingHit();
+            }
+            // 어퍼컷!         
+            if (Guard_ani_Setting.G_S_T == Guard_ani_Setting.special_state.upper && 
+                M_S_T != Maskman_ani_Setting.special_state.Floating)
+            {
+                M_S_T = Maskman_ani_Setting.special_state.Floating;
                 ani.SetTrigger("Upperhit");
                 isfloating = true;
-                gameObject.GetComponent<Rigidbody>().useGravity = true;
-                gameObject.GetComponent<Rigidbody>().AddForce(Vector3.up * 7, ForceMode.Impulse);
-                
+                rb.useGravity = true;
+                rb.AddForce(Vector3.up * 7, ForceMode.Impulse);
 
                 // 공중 콤보를 위한 마스크맨의 hitcollider을 회전시키기 위해 가져옴
                 // floating collider 90도 회전
@@ -98,10 +118,17 @@ public class Maskman_ani_Setting : MonoBehaviour
                  //Debug.Log(transform.Find("M_Wall_hit").transform.rotation);
                 ani.SetBool("Floating", true);
             }
+           
+
         }
         if (Guard_ani_Setting.G_A_T == Guard_ani_Setting.ani_state.K_attack)
         {
-
+            Debug.Log(M_A_T);
+            if (M_S_T == Maskman_ani_Setting.special_state.Floating)
+            {
+                Debug.Log("머리");
+                floatingHit();
+            }
             soundSource.clip = Audioclip[4];
             soundSource.PlayOneShot(Audioclip[4]);
         }
@@ -115,18 +142,25 @@ public class Maskman_ani_Setting : MonoBehaviour
             soundSource.clip = Audioclip[2];
             soundSource.PlayOneShot(Audioclip[2]);
 
-            // 어퍼컷! 
-            if(Guard_ani_Setting.G_S_T == Guard_ani_Setting.special_state.upper)
+            // 공중에 떠있을때
+            if (M_S_T == Maskman_ani_Setting.special_state.Floating)
             {
-                M_A_T = Maskman_ani_Setting.ani_state.Floating;
+                Debug.Log("중단");
+                floatingHit();
+            }
+
+            // 어퍼컷! 
+            if (Guard_ani_Setting.G_S_T == Guard_ani_Setting.special_state.upper &&
+                M_S_T != Maskman_ani_Setting.special_state.Floating)
+            {
+                //Debug.Log("실행");
+                M_S_T = Maskman_ani_Setting.special_state.Floating;
                 Guard_ani_Setting.G_S_T = Guard_ani_Setting.special_state.idle;
                 ani.SetTrigger("Upperhit");
                 isfloating = true;
                 gameObject.GetComponent<Rigidbody>().useGravity = true;
-                gameObject.GetComponent<Rigidbody>().AddForce(Vector3.up * 7, ForceMode.Impulse);
-              
-                //gameObject.GetComponent<Rigidbody>().AddForce(transform.forward * 30, ForceMode.Impulse);
-                Debug.Log(gameObject.GetComponent<Rigidbody>().velocity);
+                rb.AddForce(Vector3.up * 7, ForceMode.Impulse);
+                
 
                 // floating collider 90도 회전
                 StartCoroutine(FloatingColliderdelay());
@@ -134,9 +168,18 @@ public class Maskman_ani_Setting : MonoBehaviour
                 ani.SetBool("Floating", true);
             }
 
+            // 공중에 떠 있을때
+           
+
         }
         if (Guard_ani_Setting.G_A_T == Guard_ani_Setting.ani_state.K_attack)
         {
+            Debug.Log(M_A_T);
+            if (M_S_T == Maskman_ani_Setting.special_state.Floating)
+            {
+                Debug.Log("중단");
+                floatingHit();
+            }
             soundSource.clip = Audioclip[5];
             soundSource.PlayOneShot(Audioclip[5]);
         }
@@ -145,7 +188,7 @@ public class Maskman_ani_Setting : MonoBehaviour
     // 하단 맞는 애니메이션
     void Low_hit()
     {
-
+        Debug.Log("머리");
     }
 
     void Start()
@@ -153,10 +196,35 @@ public class Maskman_ani_Setting : MonoBehaviour
         M_A_T = ani_state.idle;
         ani = gameObject.GetComponent<Animator>();
         soundSource = gameObject.GetComponent<AudioSource>();
+        rb = gameObject.GetComponent<Rigidbody>();
+    }
+
+    public IEnumerator Knockback(float dur, float power)
+    {
+        float timer = 0f;
+        int writeCall = 0;
+
+        /*넉백을 드디어 해결했다*/
+        /*어디에도 이걸 안알려주네...*/
+        while (timer <= dur)
+        {
+            timer += Time.deltaTime;
+            writeCall += 1;
+            rb.AddRelativeForce(new Vector3(0f, 0, 1.2f * power));
+        }
+        //Debug.Log(writeCall);
+        yield return 0;
     }
 
     void Update()
     {
+        
+        if(Input.GetKeyDown(KeyCode.P)) 
+        {
+            rb.velocity = new Vector3(0,0,0);
+            StartCoroutine(Knockback(1f, 2f));
+        }
+
         if (GameManager.Gs == GameManager.Gamesetting.GameStart)
         {
             // idle 일때만 lookat 컴포넌트 켜짐
@@ -165,7 +233,7 @@ public class Maskman_ani_Setting : MonoBehaviour
             M_A_T == ani_state.forwardstep ||
             M_A_T == ani_state.backstep)
                 La.enabled = true;
-            else
+            else if(M_A_T == ani_state.H_attack || M_A_T == ani_state.K_attack)
                 La.enabled = false;
 
 
@@ -173,6 +241,7 @@ public class Maskman_ani_Setting : MonoBehaviour
             if (ani.GetCurrentAnimatorStateInfo(0).IsName("idle"))
             {
                 M_A_T = ani_state.idle;
+                transform.transform.Find("M_Wall_hit").GetComponent<BoxCollider>().enabled = true;
             }
             // ani.state => sit
             if (ani.GetCurrentAnimatorStateInfo(0).IsName("sit"))
@@ -188,6 +257,24 @@ public class Maskman_ani_Setting : MonoBehaviour
             if (ani.GetCurrentAnimatorStateInfo(0).IsName("bwd"))
             {
                 M_A_T = ani_state.backstep;
+            }
+            if (ani.GetCurrentAnimatorStateInfo(0).IsName("Lay"))
+            {
+                M_A_T = ani_state.lay;
+                transform.transform.Find("M_Wall_hit").GetComponent<BoxCollider>().enabled = false;
+
+            }
+
+            // 마스크맨 히트박스
+            if (M_A_T == ani_state.lay || M_S_T==special_state.Floating)
+            {                
+                transform.Find("M_Wall_hit").transform.localEulerAngles = new Vector3(-90, 0, 0);
+                transform.Find("M_Wall_hit").transform.localPosition = new Vector3(0, 0, 0.3f);
+            }
+            else
+            {
+                transform.Find("M_Wall_hit").transform.localEulerAngles = new Vector3(0, 0, 0);
+                transform.Find("M_Wall_hit").transform.localPosition = new Vector3(0, 0, 0);
             }
 
             // 공격 모션일때 콜라이더가 들어있는 게임 오브젝트가 켜짐.
@@ -225,16 +312,30 @@ public class Maskman_ani_Setting : MonoBehaviour
         }
         else
             M_A_T = ani_state.idle;
+
+        // ko 상황일떄 콜라이더 켜져있는 버그 수정
+        if (GameManager.Gs == GameManager.Gamesetting.KO)
+        {
+            Hand_R.SetActive(false);
+            Hand_L.SetActive(false);
+            kick_L.SetActive(false);
+            kick_R.SetActive(false);
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
-            transform.Find("M_Wall_hit").transform.localEulerAngles = new Vector3(0, 0, 0);
+            // 콜라이더 각도 설정한거 초기화
+            
             isfloating = false;
             ani.SetBool("Floating", false);
+            // 콜라이더 포지션 수정한것 초기화
+            Debug.Log("df");
             
+            M_S_T = Maskman_ani_Setting.special_state.idle;
+
         }
     }
 

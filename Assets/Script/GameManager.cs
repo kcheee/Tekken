@@ -59,7 +59,8 @@ public class GameManager : MonoBehaviour
     IEnumerator delay(TextMeshProUGUI TMP)
     {
         TMP.enabled = true;
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(2f);
+        Time.timeScale = 1f;
         TMP.enabled = false;
               
         SceneManager.LoadScene(2);
@@ -87,7 +88,6 @@ public class GameManager : MonoBehaviour
     bool flag;
     private void Update()
     {
-
         if (Input.GetKeyUp(KeyCode.KeypadEnter))    // 임의로
         {
             SceneManager.LoadScene(2);
@@ -107,19 +107,18 @@ public class GameManager : MonoBehaviour
             time = 0;
             StartCoroutine(delay(TimeUp_text));
         }
-
         // Ko 상태일때
         if (M_HP.m_hp.hp <= 0 || G_HP.g_hp.hp <= 0)
         {
-            Gs = Gamesetting.Loding;
+            Gs = Gamesetting.KO;
+            
             if (flag)
             {
+                Time.timeScale = 0.2f;
                 soundSource.PlayOneShot(Audioclip[4]);
                 flag = false;
             }
             StartCoroutine(delay(ko_text));
         }
-
-
     }
 }
