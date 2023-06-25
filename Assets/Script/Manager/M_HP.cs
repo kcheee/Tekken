@@ -10,6 +10,7 @@ public class M_HP : MonoBehaviour
     public int hp = 9999;
     public int maxHp = 5;
     public Slider hpUI;
+    public Animator M_hp_ani;
 
     private void Awake()
     {
@@ -32,7 +33,7 @@ public class M_HP : MonoBehaviour
     }
     public void Head_hit(int value) //hp가 바뀌는 부분
     {
-        if (Guard_ani_Setting.G_A_T == Guard_ani_Setting.ani_state.H_attack)
+        if (Guard_ani_Setting.G_A_T == Guard_ani_Setting.ani_state.H_attack) 
             value = 3;
         if (Guard_ani_Setting.G_A_T == Guard_ani_Setting.ani_state.K_attack)
             value = 5;
@@ -40,15 +41,26 @@ public class M_HP : MonoBehaviour
         hp = GetHP() - value;
 
         hpUI.value = hp;
+        M_hp_ani.SetTrigger("HP_ani");
     }
     void Middle_hit(int value)
     {
+        // SPECIAL ATTACK 여기서 수정하기
         if (Guard_ani_Setting.G_A_T == Guard_ani_Setting.ani_state.H_attack)
             value = 3;
 
         if (Guard_ani_Setting.G_A_T == Guard_ani_Setting.ani_state.K_attack)
             value = 5;
 
+        hp = GetHP() - value;
+
+        hpUI.value = hp;
+        M_hp_ani.SetTrigger("HP_ani");
+    }
+    void special_hit(int value)
+    {
+        Debug.Log("dfsf");
+        value = 10;
         hp = GetHP() - value;
 
         hpUI.value = hp;

@@ -31,7 +31,7 @@ public class Floating_check : StateMachineBehaviour
         if (guard)
         {
             floatingState = true;
-            Guard_ani_Setting.G_A_T = Guard_ani_Setting.ani_state.Floating;
+            Guard_ani_Setting.G_S_T = Guard_ani_Setting.special_state.Floating;
         }
         if (maskman)
         {

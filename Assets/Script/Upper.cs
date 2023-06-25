@@ -20,8 +20,8 @@ public class Upper : MonoBehaviour
 
             if (gameObject.name.Contains("Maskman"))
             {
-                Maskman_ani_Setting.M_A_T = Maskman_ani_Setting.ani_state.H_attack;
-                Debug.Log("maskman");
+                Maskman_ani_Setting.M_S_T = Maskman_ani_Setting.special_state.upper;
+            //    Debug.Log("maskman");
             }
 
             // 시간 업데이트

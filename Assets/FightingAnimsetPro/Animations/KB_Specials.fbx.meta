@@ -3098,8 +3098,8 @@ ModelImporter:
       name: KB_Superpunch
       takeName: KB_Superpunch
       internalID: 0
-      firstFrame: 0
-      lastFrame: 219
+      firstFrame: 31
+      lastFrame: 187
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -3118,7 +3118,14 @@ ModelImporter:
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events: []
+      events:
+      - time: 0.33660835
+        functionName: strongAttack_sound
+        data: 
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask:
       - path: 
         weight: 1
@@ -3842,7 +3849,14 @@ ModelImporter:
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events: []
+      events:
+      - time: 0
+        functionName: strongAttack_sound
+        data: 
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask:
       - path: 
         weight: 1

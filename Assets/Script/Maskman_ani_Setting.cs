@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -17,7 +18,7 @@ public class Maskman_ani_Setting : MonoBehaviour
         K_attack,
         Hit_hand,
         Hit_kick,
-        Upper,
+        Upper
         
     }
 
@@ -25,13 +26,15 @@ public class Maskman_ani_Setting : MonoBehaviour
     {
         idle,
         upper,
-        Floating
+        Floating,
+        specialattack
     }
 
     public lookat La;
 
     Animator ani;
     Rigidbody rb;
+
     static public ani_state M_A_T;
     static public special_state M_S_T;
 
@@ -43,8 +46,6 @@ public class Maskman_ani_Setting : MonoBehaviour
     public GameObject Hand_L;
     public GameObject kick_R;
     public GameObject kick_L;
-
-  
 
     // 공중에 떠있는지 체크
     bool isfloating;
@@ -99,7 +100,6 @@ public class Maskman_ani_Setting : MonoBehaviour
             soundSource.PlayOneShot(Audioclip[1]);
             if (M_S_T == Maskman_ani_Setting.special_state.Floating)
             {
-                Debug.Log("머리");
                 floatingHit();
             }
             // 어퍼컷!         
@@ -123,10 +123,10 @@ public class Maskman_ani_Setting : MonoBehaviour
         }
         if (Guard_ani_Setting.G_A_T == Guard_ani_Setting.ani_state.K_attack)
         {
-            Debug.Log(M_A_T);
+         
             if (M_S_T == Maskman_ani_Setting.special_state.Floating)
             {
-                Debug.Log("머리");
+                
                 floatingHit();
             }
             soundSource.clip = Audioclip[4];
@@ -145,7 +145,7 @@ public class Maskman_ani_Setting : MonoBehaviour
             // 공중에 떠있을때
             if (M_S_T == Maskman_ani_Setting.special_state.Floating)
             {
-                Debug.Log("중단");
+              
                 floatingHit();
             }
 
@@ -155,7 +155,7 @@ public class Maskman_ani_Setting : MonoBehaviour
             {
                 //Debug.Log("실행");
                 M_S_T = Maskman_ani_Setting.special_state.Floating;
-                Guard_ani_Setting.G_S_T = Guard_ani_Setting.special_state.idle;
+
                 ani.SetTrigger("Upperhit");
                 isfloating = true;
                 gameObject.GetComponent<Rigidbody>().useGravity = true;
@@ -199,6 +199,7 @@ public class Maskman_ani_Setting : MonoBehaviour
         rb = gameObject.GetComponent<Rigidbody>();
     }
 
+    // 보류
     public IEnumerator Knockback(float dur, float power)
     {
         float timer = 0f;
@@ -278,12 +279,13 @@ public class Maskman_ani_Setting : MonoBehaviour
             }
 
             // 공격 모션일때 콜라이더가 들어있는 게임 오브젝트가 켜짐.
-            if (M_A_T == ani_state.H_attack)
+            if (M_A_T == ani_state.H_attack && !ani.GetCurrentAnimatorStateInfo(0).IsName("Dash"))
             {
                 Hand_R.SetActive(true);
                 Hand_L.SetActive(true);
             }
-            else if (M_A_T == ani_state.K_attack)
+            // 대쉬하고 발공격할때 콜라이더 켜지는거 수정
+            else if (M_A_T == ani_state.K_attack && !ani.GetCurrentAnimatorStateInfo(0).IsName("Dash"))
             {
                 kick_L.SetActive(true);
                 kick_R.SetActive(true);
@@ -294,7 +296,9 @@ public class Maskman_ani_Setting : MonoBehaviour
                 Hand_L.SetActive(false);
                 kick_L.SetActive(false);
                 kick_R.SetActive(false);
+
             }
+
 
             // 방어 모션
             if (M_A_T == ani_state.backstep)
@@ -321,6 +325,7 @@ public class Maskman_ani_Setting : MonoBehaviour
             kick_L.SetActive(false);
             kick_R.SetActive(false);
         }
+        
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -332,7 +337,7 @@ public class Maskman_ani_Setting : MonoBehaviour
             isfloating = false;
             ani.SetBool("Floating", false);
             // 콜라이더 포지션 수정한것 초기화
-            Debug.Log("df");
+          
             
             M_S_T = Maskman_ani_Setting.special_state.idle;
 
@@ -429,14 +434,28 @@ public class Maskman_ani_Setting : MonoBehaviour
 
     }
 
-    // 공격
+    IEnumerator ExecuteForDuration(float duration, ani_state state)
+    {
+        float timer = 0f;
+
+        while (timer < duration)
+        {
+            // 일정 시간 동안 실행될 코드
+
+            M_A_T = state;
+            // 시간 업데이트
+            timer += Time.deltaTime;
+
+            yield return null;
+        }
+    }
+        // 공격
     void R_jab()
     {
         if (Input.GetKeyDown(KeyCode.Keypad6))
         {
             ani.SetBool("Jab_R", true);
-            M_A_T = ani_state.H_attack;
-
+            StartCoroutine(ExecuteForDuration(0.2f, ani_state.H_attack));
             StartCoroutine(delay("Jab_R"));
         }
     }
@@ -444,7 +463,7 @@ public class Maskman_ani_Setting : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Keypad5))
         {
-            M_A_T = ani_state.H_attack;
+            StartCoroutine(ExecuteForDuration(0.2f, ani_state.H_attack));
             ani.SetBool("Jab_L", true);
             StartCoroutine(delay("Jab_L"));
         }
@@ -454,7 +473,7 @@ public class Maskman_ani_Setting : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Keypad3))
         {
             ani.SetBool("Kick_R", true);
-            M_A_T = ani_state.K_attack;
+            StartCoroutine(ExecuteForDuration(0.2f, ani_state.K_attack));
             StartCoroutine(delay("Kick_R"));
         }
     }
@@ -463,7 +482,7 @@ public class Maskman_ani_Setting : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Keypad2))
         {
             ani.SetBool("Kick_L", true);
-            M_A_T = ani_state.K_attack;
+            StartCoroutine(ExecuteForDuration(0.2f, ani_state.K_attack));
             StartCoroutine(delay("Kick_L"));
         }
     }

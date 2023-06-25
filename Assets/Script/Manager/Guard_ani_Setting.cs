@@ -10,24 +10,29 @@ public class Guard_ani_Setting : MonoBehaviour
         backstep,
         sit,
         jump,
+        lay,
         guard,
         H_attack,
         K_attack,
         Hit_hand,
         Hit_kick,
         Upper,
-        Floating
+        
     }
 
     public enum special_state
     {
         idle,
-        upper
+        upper,
+        Floating,
+        specialattack
     }
 
     public lookat La;
 
+    // 컴포넌트 가져오기
     Animator ani;
+    Rigidbody rb;
 
     // 애니메이터 상황
     static public ani_state G_A_T;
@@ -42,6 +47,9 @@ public class Guard_ani_Setting : MonoBehaviour
     public BoxCollider Hand_L;
     public BoxCollider kick_R;
     public BoxCollider kick_L;
+
+    // 공중에 떠있는지 체크
+    bool isfloating;
 
     // dash,backstep,sit,jump 플래그
     bool D_flag;
@@ -65,16 +73,21 @@ public class Guard_ani_Setting : MonoBehaviour
         S_flag = false;
     }
 
-    // guard sound 애니메이션 이벤트로 호출
-    void Guard_Sound()
+    IEnumerator FloatingColliderdelay()
     {
-        soundSource.clip = Audioclip[0];
-        soundSource.PlayOneShot(Audioclip[0]);
+        yield return new WaitForSeconds(0.4f);
+        //콜라이더 각도와 포지션 수정
+        transform.Find("G_Wall_hit").transform.localEulerAngles = new Vector3(-90, 0, 0);
+        transform.Find("G_Wall_hit").transform.localPosition = new Vector3(0, 0, 0.3f);
     }
-    void jab_sound()
+
+    // floating 상태일 때 hit
+    void floatingHit()
     {
-        //soundSource.clip = Audioclip[0];
-        //soundSource.PlayOneShot(Audioclip[0]);
+        rb.velocity = Vector3.zero;
+        rb.AddForce(Vector3.up * 3f, ForceMode.Impulse);
+
+        ani.SetTrigger("air hit");
     }
 
     // hit 애니메이션, 애니메이션 이벤트로 호출
@@ -85,11 +98,41 @@ public class Guard_ani_Setting : MonoBehaviour
         {
             soundSource.clip = Audioclip[1];
             soundSource.PlayOneShot(Audioclip[1]);
+
+            if (G_S_T == Guard_ani_Setting.special_state.Floating)
+            {         
+                floatingHit();
+            }
+
+            // 어퍼컷!         
+            if (Maskman_ani_Setting.M_S_T == Maskman_ani_Setting.special_state.upper &&
+                G_S_T != Guard_ani_Setting.special_state.Floating)
+            {
+                Debug.Log("fdsf");
+                G_S_T = Guard_ani_Setting.special_state.Floating;
+                ani.SetTrigger("Upperhit");
+                isfloating = true;
+                rb.useGravity = true;
+                rb.AddForce(Vector3.up * 7, ForceMode.Impulse);
+
+                // 공중 콤보를 위한 마스크맨의 hitcollider을 회전시키기 위해 가져옴
+                // floating collider 90도 회전
+                StartCoroutine(FloatingColliderdelay());
+                //Debug.Log(transform.Find("M_Wall_hit").transform.rotation);
+                ani.SetBool("Floating", true);
+            }
+
         }
         if (Maskman_ani_Setting.M_A_T == Maskman_ani_Setting.ani_state.K_attack)
         {
             soundSource.clip = Audioclip[4];
             soundSource.PlayOneShot(Audioclip[4]);
+          
+            if (G_S_T == Guard_ani_Setting.special_state.Floating)
+            {
+                Debug.Log("머리");
+                floatingHit();
+            }
 
         }
     }
@@ -101,11 +144,42 @@ public class Guard_ani_Setting : MonoBehaviour
         {
             soundSource.clip = Audioclip[2];
             soundSource.PlayOneShot(Audioclip[2]);
+
+            // 공중에 떠있을때
+            if (G_S_T == Guard_ani_Setting.special_state.Floating)
+            {
+                Debug.Log("중단");
+                floatingHit();
+            }
+            Debug.Log("mid");
+            // 어퍼컷! 
+            if (Maskman_ani_Setting.M_S_T == Maskman_ani_Setting.special_state.upper &&
+                G_S_T != Guard_ani_Setting.special_state.Floating)
+            {
+                //Debug.Log("실행");
+                G_S_T = Guard_ani_Setting.special_state.Floating;
+                ani.SetTrigger("Upperhit");
+                isfloating = true;
+                gameObject.GetComponent<Rigidbody>().useGravity = true;
+                rb.AddForce(Vector3.up * 7, ForceMode.Impulse);
+
+                // floating collider 90도 회전
+                StartCoroutine(FloatingColliderdelay());
+                //gameObject.GetComponent<Rigidbody>().AddForce(Vector3.forward * 10, ForceMode.Impulse);
+                ani.SetBool("Floating", true);
+            }
+
         }
         if (Maskman_ani_Setting.M_A_T == Maskman_ani_Setting.ani_state.K_attack)
         {
             soundSource.clip = Audioclip[5];
             soundSource.PlayOneShot(Audioclip[5]);
+
+            if (G_S_T == Guard_ani_Setting.special_state.Floating)
+            {
+                
+                floatingHit();
+            }
         }
     }
 
@@ -118,7 +192,7 @@ public class Guard_ani_Setting : MonoBehaviour
     void Start()
     {
         G_A_T = ani_state.idle;
-        
+        rb = gameObject.GetComponent<Rigidbody>();
         ani = gameObject.GetComponent<Animator>();
         soundSource = gameObject.GetComponent<AudioSource>();
     }
@@ -145,6 +219,7 @@ public class Guard_ani_Setting : MonoBehaviour
             if (ani.GetCurrentAnimatorStateInfo(0).IsName("idle"))
             {
                 G_A_T = ani_state.idle;
+                transform.transform.Find("G_Wall_hit").GetComponent<BoxCollider>().enabled = true;
             }
             // ani.state => sit
             if (ani.GetCurrentAnimatorStateInfo(0).IsName("sit"))
@@ -159,7 +234,26 @@ public class Guard_ani_Setting : MonoBehaviour
             // ani.state => fwd
             if (ani.GetCurrentAnimatorStateInfo(0).IsName("bwd"))
             {
-                G_A_T = ani_state.backstep;
+                G_A_T = ani_state.backstep;          
+            }
+            if (ani.GetCurrentAnimatorStateInfo(0).IsName("Lay"))
+            {
+                G_A_T = ani_state.lay;
+                transform.transform.Find("G_Wall_hit").GetComponent<BoxCollider>().enabled = false;
+            }
+
+           
+
+            // 가드 히트박스
+            if (G_A_T == ani_state.lay || G_S_T == special_state.Floating)
+            {
+                transform.Find("G_Wall_hit").transform.localEulerAngles = new Vector3(-90, 0, 0);
+                transform.Find("G_Wall_hit").transform.localPosition = new Vector3(0, 0, 0.3f);
+            }
+            else
+            {
+                transform.Find("G_Wall_hit").transform.localEulerAngles = new Vector3(0, 0, 0);
+                transform.Find("G_Wall_hit").transform.localPosition = new Vector3(0, 0, 0);
             }
 
             //Debug.Log(G_A_T);
@@ -210,6 +304,22 @@ public class Guard_ani_Setting : MonoBehaviour
             Hand_L.enabled = false;
             kick_L.enabled=false;
             kick_R.enabled=false;
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            // 콜라이더 각도 설정한거 초기화
+
+            isfloating = false;
+            ani.SetBool("Floating", false);
+            // 콜라이더 포지션 수정한것 초기화
+        
+
+            G_S_T = Guard_ani_Setting.special_state.idle;
+
         }
     }
 
@@ -299,58 +409,58 @@ public class Guard_ani_Setting : MonoBehaviour
 
 
     }
+
+
+    IEnumerator ExecuteForDuration(float duration, ani_state state)
+    {
+        float timer = 0f;
+
+        while (timer < duration)
+        {
+            // 일정 시간 동안 실행될 코드
+
+            G_A_T = state;
+            // 시간 업데이트
+            timer += Time.deltaTime;
+
+            yield return null;
+        }
+    }
+    // 공격
     void R_jab()
     {
         if (Input.GetKeyDown(KeyCode.I))
         {
-            if(G_A_T!=ani_state.forwardstep)
-            G_A_T = ani_state.H_attack;
             ani.SetBool("Jab_R", true);
+            StartCoroutine(ExecuteForDuration(0.2f, ani_state.H_attack));
             StartCoroutine(delay("Jab_R"));
-        }
-        if(Input.GetKey(KeyCode.I))
-        {
-            G_A_T = ani_state.H_attack;
         }
     }
     void L_jab()
     {
         if (Input.GetKeyDown(KeyCode.U))
         {
-            G_A_T = ani_state.H_attack;
+            StartCoroutine(ExecuteForDuration(0.2f, ani_state.H_attack));
             ani.SetBool("Jab_L", true);
             StartCoroutine(delay("Jab_L"));
-        }
-        if (Input.GetKeyDown(KeyCode.U))
-        {
-            G_A_T = ani_state.H_attack;
         }
     }
     void R_kick()
     {
-        if (Input.GetKeyDown(KeyCode.J))
+        if (Input.GetKeyDown(KeyCode.K))
         {
-            G_A_T = ani_state.K_attack;
             ani.SetBool("Kick_R", true);
+            StartCoroutine(ExecuteForDuration(0.2f, ani_state.K_attack));
             StartCoroutine(delay("Kick_R"));
-        }
-        if (Input.GetKey(KeyCode.J))
-        {
-            G_A_T = ani_state.K_attack;
         }
     }
     void L_kick()
     {
-        if (Input.GetKeyDown(KeyCode.K))
+        if (Input.GetKeyDown(KeyCode.J))
         {
-            G_A_T = ani_state.K_attack;
             ani.SetBool("Kick_L", true);
+            StartCoroutine(ExecuteForDuration(0.2f, ani_state.K_attack));
             StartCoroutine(delay("Kick_L"));
         }
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            G_A_T = ani_state.K_attack;
-        }
     }
-
 }

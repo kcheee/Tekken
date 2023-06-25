@@ -9,6 +9,8 @@ public class G_HP : MonoBehaviour
     public int hp = 9999;
     public int maxHp = 5;
     public Slider hpUI;
+    public Animator G_hp_ani;
+    
 
     private void Awake()
     {
@@ -33,9 +35,10 @@ public class G_HP : MonoBehaviour
             value = 3;
         if (Maskman_ani_Setting.M_A_T == Maskman_ani_Setting.ani_state.K_attack)
             value = 5;
-        hp = GetHP() - value;
-     
+        hp = GetHP() - value;    
         hpUI.value = hp;
+        G_hp_ani.SetTrigger("HP_ani");
+
     }
     void Middle_hit(int value)
     {       
@@ -47,6 +50,14 @@ public class G_HP : MonoBehaviour
         {
             value = 5;
         }
+        hp = GetHP() - value;
+        G_hp_ani.SetTrigger("HP_ani");
+        hpUI.value = hp;
+    }
+    void special_hit(int value)
+    {
+        Debug.Log("dfsf");
+        value = 10;
         hp = GetHP() - value;
 
         hpUI.value = hp;
