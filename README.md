@@ -30,5 +30,4 @@ Unity 2019.3.26f1
 
 # 📃 결과물   
 ### 시연영상
-[![Video Label](http://img.youtube.com/UrSLL-zkIXg&t=111s/0.jpg)](https://youtu.be/UrSLL-zkIXg&t=111s)   
-
+[![Video Label](https://github.com/kcheee/Tekken/assets/86779278/323ba1e7-51f8-4b69-bff2-bb852b6b8f74)](https://youtu.be/UrSLL-zkIXg&t=111s)   
