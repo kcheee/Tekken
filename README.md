@@ -30,5 +30,5 @@ Unity 2019.3.26f1
 
 # 📃 결과물   
 ### 시연영상
-[![Video Label](http://img.youtube.com/vi/ZSd1B3I5J3M/0.jpg)](https://youtu.be/ZSd1B3I5J3M)   
+[![Video Label](http://img.youtube.com/UrSLL-zkIXg&t=111s/0.jpg)](https://youtu.be/ZSd1B3I5J3M)   
 
