@@ -1,11 +1,11 @@
 # 📖 프로젝트 명
-### Alice in wonderLand(VR-Chess)   
+### Tekken7 (모작) 
 
 메타버스 아카데미 2기 9월 월말평가    
 2023.06.01 ~ 2023.06.30   
 Unity 2019.3.26f1
 
-![image](https://github.com/kcheee/VR_Chess/assets/86779278/c5ea410b-8a00-40ce-9995-185d6eaf4838)    
+![image](https://github.com/kcheee/Tekken/assets/86779278/6531d8a3-d1fc-4d68-961b-25f08fd96695)
 
 # 📃 프로젝트 소개
 
@@ -15,7 +15,6 @@ Unity 2019.3.26f1
 **Game mode**: Player vs Player   
 **Software** : Unity-3D   
 **Language** : C#   
-
 
 
 # 📃 클래스 설계
